@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.itheima.ssm.dao.UserInfoDao">
+
+
+    <!--查询用户 角色-->
+    <resultMap id="userInfo_role" type="userInfo">
+        <id property="id" column="id"></id>
+        <result property="username" column="USERNAME"></result>
+        <result property="email" column="EMAIL"></result>
+        <result property="password" column="PASSWORD"></result>
+        <result property="phoneNum" column="PHONENUM"></result>
+        <result property="status" column="STATUS"></result>
+
+        <collection property="roles" column="id" ofType="role"
+                    select="com.itheima.ssm.dao.RoleDao.findByUserId">
+        </collection>
+
+    </resultMap>
+
+    <select id="findByUsername" resultMap="userInfo_role">
+        SELECT * from USERINFO WHERE USERNAME=#{s}
+    </select>
+
+    <!--查询所有用户-->
+    <select id="findAll" resultType="userInfo">
+    SELECT * from USERINFO
+    </select>
+
+
+    <!--根据一个id查用户userInfo_role2   -->
+    <resultMap id="userInfo_role2" type="userInfo" >
+        <id property="id" column="id"></id>
+        <result property="username" column="username"></result>
+        <result property="email" column="email"></result>
+        <result property="password" column="password"></result>
+        <result property="phoneNum" column="phonenum"></result>
+        <result property="status" column="status"></result>
+        <!--1 V  N-->
+        <collection property="roles" column="id" ofType="role"
+                    select="com.itheima.ssm.dao.RoleDao.findByUserId">
+        </collection>
+
+    </resultMap>
+    <!--根据一个id查-->
+    <select id="findById" resultMap="userInfo_role2">
+        SELECT * from USERINFO WHERE ID=#{id}
+    </select>
+
+
+
+    <!--添加用户-->
+    <insert id="save" parameterType="userInfo">
+        INSERT INTO USERINFO (USERNAME,EMAIL,PASSWORD,PHONENUM,STATUS)VALUES(#{username},#{email},#{password},#{phoneNum},#{status})
+    </insert>
+
+
+    <!--  查询该用户下没有的角色 -->
+    <resultMap id="user_otherRole" type="userInfo" autoMapping="true">
+        <id property="id" column="id"></id>
+
+        <collection property="roles" ofType="role" column="id"
+                    select="com.itheima.ssm.dao.RoleDao.findOtherByUserId">
+        </collection>
+    </resultMap>
+
+    <select id="findOtherRoleByUserId" resultMap="user_otherRole" >
+        SELECT * from USERINFO where ID=#{id}
+    </select>
+
+
+    <!--根据username 模糊查询-->
+        <select id="findByName" resultType="userInfo">
+            SELECT * FROM USERINFO
+            <where>
+                username like #{username}
+            </where>
+        </select>
+
+</mapper>

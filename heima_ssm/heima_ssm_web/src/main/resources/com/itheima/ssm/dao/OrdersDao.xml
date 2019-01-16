@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.ssm.dao.OrdersDao">
+
+
+<!--订单 商品 两表联查 显示order-list -->
+    <resultMap id="orders_product" type="orders">
+        <id property="id" column="oid"></id>
+        <result property="orderNum" column="ordernum"></result>
+        <result property="orderStatus" column="orderStatus"></result>
+        <result property="orderTime" column="orderTime"></result>
+
+        <association property="product" javaType="product">
+            <result property="productName" column="productName"></result>
+            <result property="productPrice" column="productPrice"></result>
+        </association>
+    </resultMap>
+
+    <select id="findAll" resultMap="orders_product">
+              select o.id oid,o.ordernum,p.productname,p.productprice,o.ordertime,o.orderstatus
+      from orders o left JOIN product p on o.productid=p.id
+    </select>
+
+
+
+    <!-- orders  product  member traveller 四表联查 显示 订单详情页 orders-show.jsp-->
+    <resultMap id="orders_product_member_traveller" type="orders">
+
+        <id property="id" column="id"></id>
+        <result property="orderNum" column="ORDERNUM"></result>
+        <result property="orderTime" column="ORDERTIME"></result>
+        <result property="peopleCount" column="PEOPLECOUNT"></result>
+        <result property="payType" column="PAYTYPE"></result>
+        <result property="orderDesc" column="ORDERDESC"></result>
+        <result property="orderStatus" column="ORDERSTATUS"></result>
+
+        <!--orders 1 对 1 product -->
+        <association property="product" column="PRODUCTID" javaType="product"
+        select="com.itheima.ssm.dao.ProductDao.findByProductId">
+        </association>
+
+        <!--orders 1 对 1 member -->
+        <association property="member" column="MEMBERID" javaType="member"
+                     select="com.itheima.ssm.dao.MemberDao.findByMemberId">
+        </association>
+
+        <!--orders 1对 N traveller  通过第三张表查-->
+        <collection property="travellers" column="ID" ofType="traveller"
+                    select="com.itheima.ssm.dao.TravellerDao.findByOrderId">
+        </collection>
+
+    </resultMap>
+
+    <select id="findById" resultMap="orders_product_member_traveller">
+        SELECT * FROM ORDERS WHERE ID=#{orderId}
+    </select>
+</mapper>

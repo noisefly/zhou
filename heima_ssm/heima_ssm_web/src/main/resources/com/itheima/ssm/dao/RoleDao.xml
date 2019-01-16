@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.itheima.ssm.dao.RoleDao">
+
+    <!--根据 用户id  查 permission-->
+    <resultMap id="role_permission" type="role">
+        <id property="id" column="id"></id>
+        <result property="roleName" column="ROLENAME"></result>
+        <result property="roleDesc" column="ROLEDESC"></result>
+        <!-- 1 V N-->
+        <collection property="permissions" column="id" ofType="permission"
+                    select="com.itheima.ssm.dao.PermissionDao.findByRoleId">
+        </collection>
+    </resultMap>
+
+    <select id="findByUserId" resultMap="role_permission">
+      select * from ROLE where id in (select ROLEID from USERINFO_ROLE where USERID=#{userId})
+    </select>
+
+
+    <!--根据Id集合查-->
+    <select id="findById" resultType="role">
+         SELECT * FROM ROLE WHERE id=#{id}
+    </select>
+
+
+    <!--查询所有 角色-->
+    <select id="findAll" resultType="role">
+            SELECT *FROM  ROLE
+        </select>
+
+    <!--添加 角色-->
+
+    <insert id="save" parameterType="role">
+        insert into role(rolename,roledesc) values(#{roleName},#{roleDesc})
+    </insert>
+
+
+       <!--跟据roleId 查询角色详情页(含权限信息)-->
+        <resultMap id="role_permission2" type="role">
+            <id property="id" column="id"></id>
+            <result property="roleName" column="ROLENAME"></result>
+            <result property="roleDesc" column="ROLEDESC"></result>
+
+            <collection property="permissions" column="id" ofType="permission"
+                        select="com.itheima.ssm.dao.PermissionDao.findByRoleId">
+            </collection>
+
+        </resultMap>
+
+    <select id="findByRId" resultMap="role_permission2">
+        SELECT * from ROLE WHERE ID=#{id}
+    </select>
+
+<!--根据 userId查 用户下没有的角色-->
+    <select id="findOtherByUserId" resultType="role">
+        select * from ROLE where id not in (select ROLEID from USERINFO_ROLE where USERID=#{userId})
+    </select>
+
+
+
+    <!-- 根据rid 查 其它没有的权限 -->
+    <resultMap id="role_OtherPermission" type="role" autoMapping="true">
+        <id property="id" column="id"></id>
+
+        <collection property="permissions" ofType="permission" column="id"
+                    select="com.itheima.ssm.dao.PermissionDao.findOtherByRid">
+        </collection>
+
+    </resultMap>
+
+    <select id="findOtherPermissionByRid" resultMap="role_OtherPermission">
+        SELECT * FROM ROLE WHERE ID=#{rid}
+    </select>
+
+</mapper>
